@@ -30,6 +30,9 @@
     <ClCompile Include="PseudoDES.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ElectronRunner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vec3.h">
@@ -42,6 +45,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PseudoDES.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ElectronRunner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="emc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,57 +1,77 @@
 #include <iostream>
-#include <unordered_map>
-#include <algorithm>
-#include <string>
+#include "emc.h"
 #include "PseudoDES.h"
 #include "ParallelPlateChamber.h"
+#include "ElectronRunner.h"
+#include "Electron.h"
 
-using std::string;
-using std::unordered_map;
-
-bool ReadArgs(int argc, char* argv[], unordered_map<string, string>& map);
-bool GetArg(string key, unordered_map<string, string> args, double& e);
-bool GetArg(string key, unordered_map<string, string> args, int& e);
-bool HaveArg(string key, unordered_map<string, string> args);
-
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    std::unordered_map<string, string> args;
-    if (!ReadArgs(argc, argv, args)) return 1;
+    return emc::main(argc, argv);
+}
 
-    double d;
-    double V;
-    if (!GetArg("d", args, d)) return 1;
-    if (!GetArg("v", args, V)) return 1;
+unordered_map<string, string> emc::args;
+double emc::d = 5.0e-2;  // 5 cm
+double emc::Ui = 15.0;   // 15 eV
+double emc::gamma = 1.0 / 50.0;
+double emc::Nc;
+double emc::Ni;
+int emc::reps;
+int emc::seed = 1;
 
+double emc::dt = 1.0;
+
+double emc::V;
+double emc::lambda;
+
+int emc::main(int argc, char *argv[])
+{
+    if (!ReadArgs(argc, argv)) return 1;
+
+    if (!MaybeGetArg("d", d)) return 1;
+    if (!MaybeGetArg("ui", Ui)) return 1;
+    if (!MaybeGetArg("gamma", gamma)) return 1;
+    if (!GetArg("nc", Nc)) return 1;
+    if (!GetArg("ni", Ni)) return 1;
+    if (!GetArg("reps", reps)) return 1;
+    if (!MaybeGetArg("seed", seed)) return 1;
+    if (!MaybeGetArg("dt", dt)) return 1;
+
+    lambda = d / Nc;
+    V = Ni * Ui;
+
+    printf("V=%.3f  lambda=%.6f  d=%.4f  Nc=%.2f  Ni=%.2f  Ui=%.2f  1/gamma=%.2f  reps=%d  seed=%d\n",
+        V, lambda, d, Nc, Ni, Ui, 1.0/gamma, reps, seed);
+    printf(" dt=%.3e\n", dt);
+    ElectronRunner::dt = dt;
+
+    PseudoDES rand(1, seed);
     ParallelPlateChamber pp(d, V);
 
-    int reps;
-    if (!GetArg("reps", args, reps)) return 1;
-
-    int seed = 1;
-    if (HaveArg("seed", args))
-    {
-        if (!GetArg("seed", args, seed)) return 1;
-    }
-
-    PseudoDES rand(1,seed);
-
-
-
-
-
-
+    ElectronRunner run(lambda, Ui, pp, rand, reps);
 
     return 1;
 }
 
-bool HaveArg(string key, unordered_map<string, string> args)
+
+bool emc::HaveArg(string key)
 {
     return args.count(key) == 1;
 }
 
+bool emc::MaybeGetArg(string key, double& e)
+{
+    if (!HaveArg(key)) return true;
+    return GetArg(key, e);
+}
 
-bool GetArg(string key, unordered_map<string, string> args, double& e)
+bool emc::MaybeGetArg(string key, int& e)
+{
+    if (!HaveArg(key)) return true;
+    return GetArg(key, e);
+}
+
+bool emc::GetArg(string key, double& e)
 {
     try
     {
@@ -65,7 +85,7 @@ bool GetArg(string key, unordered_map<string, string> args, double& e)
     }
 }
 
-bool GetArg(string key, unordered_map<string, string> args, int& e)
+bool emc::GetArg(string key, int& e)
 {
     try
     {
@@ -79,13 +99,14 @@ bool GetArg(string key, unordered_map<string, string> args, int& e)
     }
 }
 
-void ToLower(string& s)
+void emc::ToLower(string& s)
 {
     std::transform(s.begin(), s.end(), s.begin(), tolower);
 }
 
-bool ReadArgs(int argc, char* argv[], unordered_map<string,string>& map)
+bool emc::ReadArgs(int argc, char* argv[])
 {
+    bool success = true;
     for (int ii = 1; ii < argc; ii++)
     {
         // Look for "key=value"
@@ -97,18 +118,18 @@ bool ReadArgs(int argc, char* argv[], unordered_map<string,string>& map)
             ToLower(key);
             string val = arg.substr(eq + 1, string::npos);
             
-            if (map.count(key) != 0)
+            if (args.count(key) != 0)
             {
                 printf("Parameter %s is defined more than once.\n", key);
-                return false;
+                success = false;
             }
-            map[key] = val;
+            args[key] = val;
         }
         else
         {
             printf("Bad command line option %s.\n", arg);
+            success = false;
         }
     }
-    return true;
+    return success;
 }
-

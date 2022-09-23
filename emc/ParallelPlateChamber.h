@@ -1,5 +1,6 @@
 #pragma once
 #include "Vec3.h"
+#include "PseudoDES.h"
 
 class ParallelPlateChamber
 {
@@ -9,6 +10,11 @@ public:
 
 	ParallelPlateChamber(double d, double v) : d(d), V(v)
 	{}
+
+	Vec3 CathodeStart(PseudoDES& rand)
+	{
+		return Vec3(d * 1e-9, 0.0, 0.0);
+	}
 
 	bool InsideCathode(const Vec3& r) const
 	{

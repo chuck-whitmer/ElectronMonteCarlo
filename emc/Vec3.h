@@ -8,6 +8,8 @@ public:
 	double y;
 	double z;
 
+	Vec3() {}
+
 	Vec3(double x, double y, double z) : x(x), y(y), z(z)
 	{}
 
@@ -41,5 +43,8 @@ public:
 		return a.x * b.x + a.y * b.y + a.y * b.y;
 	}
 
+	static const Vec3 Zero;
+
 };
 
+Vec3 operator*(double f, const Vec3& a);
