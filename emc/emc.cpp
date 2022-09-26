@@ -18,6 +18,7 @@ double emc::Nc;
 double emc::Ni;
 int emc::reps;
 int emc::seed = 1;
+bool emc::showPath = false;
 
 double emc::dt = 1.0;
 
@@ -36,19 +37,21 @@ int emc::main(int argc, char *argv[])
     if (!GetArg("reps", reps)) return 1;
     if (!MaybeGetArg("seed", seed)) return 1;
     if (!MaybeGetArg("dt", dt)) return 1;
+    if (!MaybeGetBoolArg("showpath", showPath)) return 1;
 
     lambda = d / Nc;
     V = Ni * Ui;
 
-    printf("V=%.3f  lambda=%.6f  d=%.4f  Nc=%.2f  Ni=%.2f  Ui=%.2f  1/gamma=%.2f  reps=%d  seed=%d\n",
-        V, lambda, d, Nc, Ni, Ui, 1.0/gamma, reps, seed);
-    printf(" dt=%.3e\n", dt);
-    ElectronRunner::dt = dt;
+    printf("V=%.3f  lambda=%.6f  d=%.4f  Nc=%.2f  Ni=%.2f  Ui=%.2f  1/gamma=%.2f  reps=%d  seed=%d  dt=%.2e\n",
+        V, lambda, d, Nc, Ni, Ui, 1.0/gamma, reps, seed, dt);
 
     PseudoDES rand(1, seed);
     ParallelPlateChamber pp(d, V);
 
-    ElectronRunner run(lambda, Ui, pp, rand, reps);
+    ElectronRunner run(lambda, Ui, pp, rand, reps, dt, showPath);
+
+    printf(" ionizations = %.2f +- %.2f  collisions = %.2f +- %.2f   rms travel error = %.5f  V/Nc = %.2f\n", 
+        run.meanIons, run.errIons, run.meanCols, run.errCols, run.rmsTravelError, V/Nc);
 
     return 1;
 }
@@ -69,6 +72,26 @@ bool emc::MaybeGetArg(string key, int& e)
 {
     if (!HaveArg(key)) return true;
     return GetArg(key, e);
+}
+
+bool emc::MaybeGetBoolArg(string key, bool& e)
+{
+    bool success = true;
+    if (HaveArg(key))
+    {
+        string s = args[key];
+        ToLower(s);
+        if (s == "true")
+            e = true;
+        else if (s == "false")
+            e = false;
+        else
+        {
+            printf("Bad value for %s\n", key.c_str());
+            success = false;
+        }
+    }
+    return success;
 }
 
 bool emc::GetArg(string key, double& e)
@@ -120,14 +143,14 @@ bool emc::ReadArgs(int argc, char* argv[])
             
             if (args.count(key) != 0)
             {
-                printf("Parameter %s is defined more than once.\n", key);
+                printf("Parameter %s is defined more than once.\n", key.c_str());
                 success = false;
             }
             args[key] = val;
         }
         else
         {
-            printf("Bad command line option %s.\n", arg);
+            printf("Bad command line option %s.\n", arg.c_str());
             success = false;
         }
     }

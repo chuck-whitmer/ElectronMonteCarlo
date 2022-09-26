@@ -4,13 +4,14 @@
 
 class ElectronRunner
 {
-	int reps;
-	double lambda;
-	double Ui;
-	double sum = 0.0;
-	double sum2 = 0.0;
 public:
-	static double dt;
-	ElectronRunner(double lambda, double Ui, ParallelPlateChamber& pp, PseudoDES& rand, int reps);
+	double meanIons;
+	double errIons;
+	double meanCols;
+	double errCols;
+	int reps;
+	double rmsTravelError;
+
+	ElectronRunner(double lambda, double Ui, ParallelPlateChamber& pp, PseudoDES& rand, int reps, double dt, bool showPath);
 };
 

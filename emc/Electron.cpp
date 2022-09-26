@@ -1,40 +1,84 @@
 #include <iostream>
+#include <math.h>
 #include "Electron.h"
+#include "Vec7.h"
 
-void Electron::Travel(double s, ParallelPlateChamber& pp)
+// Scatter
+//  Subtracts some energy and chooses a random scattered direction for the velocity.
+
+void Electron::Scatter(double energyLoss, PseudoDES& rand)
 {
-	double sTraveled = 0.0;
+	double newKineticEnergy = KineticEnergy() - energyLoss;
+	if (newKineticEnergy < 0.0) newKineticEnergy = 0.0;
+	double vMagnitude = sqrt(2.0 * newKineticEnergy / m);
+	double cosTheta = 2.0 * rand.RandomDouble() - 1.0;
+	double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+	double phi = 2.0 * pi * rand.RandomDouble();
+	velocity = vMagnitude * Vec3(cosTheta, sinTheta * cos(phi), sinTheta * sin(phi));
+}
+
+// Travel
+//  Moves the electron a total distance sTarget along its path through the E-field.
+//  Returns the error from not conserving energy.
+// (If this is too large, then dt will need to be smaller.)
+
+double Electron::Travel(double sTarget, ParallelPlateChamber& pp, double dt)
+{
 	double time = 0.0;
 	Vec3 p0 = position;
 	Vec3 v0 = velocity;
-	double vNorm;
-	Vec3 acceleration;
+	double s0 = 0.0;
 
-	PrintStatus(time, p0, v0, pp);
+	double phiStart = -pp.Phi(position);
+	double keStart = 0.5 * m * velocity.Square();
+
+	Vec3 p1;
+	Vec3 v1;
+	double s1;
+
+	if (showPath) PrintLocation(time, p0);
 
 	while (true)
 	{
-		acceleration = -1.0 / m * pp.EField(p0);
-		vNorm = v0.Norm();
-		sTraveled += dt * vNorm;
-		if (sTraveled > s) break;
-		// Euler method.
-		p0 = p0 + dt * v0;
-		v0 = v0 + dt * acceleration;
+		EulerStep(p0, v0, s0, p1, v1, s1, pp, dt);
+		if (s1 > sTarget) break;
+		p0 = p1;
+		v0 = v1;
+		s0 = s1;
 		time += dt;
-		//printf("dt = %11.3e  sTraveled = %11.3e\n", dt, sTraveled);
-		PrintStatus(time, p0, v0, pp);
+		if (showPath) PrintLocation(time, p0);
 	}
-	double overTime = (sTraveled - s) / vNorm;
-	double dtLast = dt - overTime;
-	p0 = p0 + dtLast * v0;
-	v0 = v0 + dtLast * acceleration;
+	double dtLast = (sTarget - s0) / (s1 - s0) * dt;
+	EulerStep(p0, v0, s0, p1, v1, s1, pp, dtLast);
 	time += dtLast;
-	PrintStatus(time, p0, v0, pp);
+	if (showPath)
+	{
+		PrintLocation(time, p1);
+		printf("\n");
+	}
 
-	position = p0;
-	velocity = v0;
+	position = p1;
+	velocity = v1;
+
+	double phiEnd = -pp.Phi(position);
+	double keEnd = 0.5 * m * velocity.Square();
+
+	double deltaE = (phiEnd + keEnd) - (phiStart + keStart);
+	return deltaE; // The amount by which energy was not conserved.
 }
+
+void Electron::EulerStep(const Vec3& pos, const Vec3& vel, const double& s, 
+	Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt)
+{
+	Vec7 x(pos, vel, s);
+	Vec7 xdot(vel, -1.0 / m * pp.EField(pos), vel.Norm());
+	Vec7 x1 = x + xdot * stepDt;
+	pos1 = x1.pos;
+	vel1 = x1.vel;
+	s1 = x1.s;
+}
+
+
 
 void Electron::PrintStatus(double t, Vec3& p, Vec3& v, ParallelPlateChamber& pp)
 {
@@ -43,7 +87,12 @@ void Electron::PrintStatus(double t, Vec3& p, Vec3& v, ParallelPlateChamber& pp)
 	printf(" %10.7f %10.7f %10.7f :", v.x, v.y, v.z);
 	double ke = 0.5 * m * v.Square();
 	double pe = -pp.Phi(p);
-	printf(" %.7f %.7f %.7f\n", pe, ke, pe+ke);
+	printf(" %.7f %.7f %.7f\n", pe, ke, pe + ke);
+}
+
+void Electron::PrintLocation(double t, Vec3& p)
+{
+	printf("%8.5f : %10.7f %10.7f %10.7f\n", t, p.x, p.y, p.z);
 }
 
 

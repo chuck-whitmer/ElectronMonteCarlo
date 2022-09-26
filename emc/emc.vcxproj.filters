@@ -53,5 +53,8 @@
     <ClInclude Include="emc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Vec7.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

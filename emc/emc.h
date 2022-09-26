@@ -18,6 +18,7 @@ class emc
 	static double Ni;
 	static int reps;
 	static int seed;
+	static bool showPath;
 
 	static double dt;
 
@@ -36,5 +37,5 @@ private:
 	static void ToLower(string& s);
 	static bool MaybeGetArg(string key, double& e);
 	static bool MaybeGetArg(string key, int& e);
-
+	static bool MaybeGetBoolArg(string key, bool& e);
 };

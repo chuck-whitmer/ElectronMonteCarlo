@@ -28,6 +28,7 @@ public:
 
 	Vec3 EField(const Vec3& r) const
 	{
+		if (r.x < 0.0 || r.x > d) return Vec3::Zero;
 		return Vec3(-V / d, 0.0, 0.0);
 	}
 
