@@ -1,7 +1,6 @@
 #include <iostream>
 #include <math.h>
 #include "Electron.h"
-#include "Vec7.h"
 
 // Scatter
 //  Subtracts some energy and chooses a random scattered direction for the velocity.
@@ -41,6 +40,7 @@ double Electron::Travel(double sTarget, ParallelPlateChamber& pp, double dt)
 	while (true)
 	{
 		EulerStep(p0, v0, s0, p1, v1, s1, pp, dt);
+		//RungeKuttaStep(p0, v0, s0, p1, v1, s1, pp, dt);
 		if (s1 > sTarget) break;
 		p0 = p1;
 		v0 = v1;
@@ -50,6 +50,7 @@ double Electron::Travel(double sTarget, ParallelPlateChamber& pp, double dt)
 	}
 	double dtLast = (sTarget - s0) / (s1 - s0) * dt;
 	EulerStep(p0, v0, s0, p1, v1, s1, pp, dtLast);
+	//RungeKuttaStep(p0, v0, s0, p1, v1, s1, pp, dtLast);
 	time += dtLast;
 	if (showPath)
 	{
@@ -71,14 +72,34 @@ void Electron::EulerStep(const Vec3& pos, const Vec3& vel, const double& s,
 	Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt)
 {
 	Vec7 x(pos, vel, s);
-	Vec7 xdot(vel, -1.0 / m * pp.EField(pos), vel.Norm());
-	Vec7 x1 = x + xdot * stepDt;
+//	Vec7 xdot(vel, -1.0 / m * pp.EField(pos), vel.Norm());
+	Vec7 x1 = x + f(x,pp) * stepDt;
 	pos1 = x1.pos;
 	vel1 = x1.vel;
 	s1 = x1.s;
 }
 
+// f - Using the position and E-field info from pp, computes the time
+// derivative of the Vec7.
 
+Vec7 Electron::f(Vec7 x, ParallelPlateChamber& pp)
+{
+	return Vec7(x.vel, -1.0 / m * pp.EField(x.pos), x.vel.Norm());
+}
+
+void Electron::RungeKuttaStep(const Vec3& pos, const Vec3& vel, const double& s,
+	Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt)
+{
+	Vec7 x(pos, vel, s);
+	Vec7 k1 = f(x, pp);
+	Vec7 k2 = f(x + k1 * (stepDt / 2), pp);
+	Vec7 k3 = f(x + k2 * (stepDt / 2), pp);
+	Vec7 k4 = f(x + k3 * stepDt, pp);
+	Vec7 x1 = x + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (stepDt / 6.0);
+	pos1 = x1.pos;
+	vel1 = x1.vel;
+	s1 = x1.s;
+}
 
 void Electron::PrintStatus(double t, Vec3& p, Vec3& v, ParallelPlateChamber& pp)
 {

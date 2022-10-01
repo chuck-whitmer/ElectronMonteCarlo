@@ -1,9 +1,12 @@
 #include <iostream>
+#include <chrono>
 #include "emc.h"
 #include "PseudoDES.h"
 #include "ParallelPlateChamber.h"
 #include "ElectronRunner.h"
 #include "Electron.h"
+
+using std::chrono::steady_clock;
 
 int main(int argc, char* argv[])
 {
@@ -48,14 +51,16 @@ int emc::main(int argc, char *argv[])
     PseudoDES rand(1, seed);
     ParallelPlateChamber pp(d, V);
 
+    steady_clock::time_point start = steady_clock::now();
     ElectronRunner run(lambda, Ui, pp, rand, reps, dt, showPath);
+    steady_clock::time_point end = steady_clock::now();
+    steady_clock::duration time = end - start;
 
-    printf(" ionizations = %.2f +- %.2f  collisions = %.2f +- %.2f   rms travel error = %.5f  V/Nc = %.2f\n", 
-        run.meanIons, run.errIons, run.meanCols, run.errCols, run.rmsTravelError, V/Nc);
+    printf(" ionizations = %.2f +- %.2f  collisions = %.2f +- %.2f   rms travel error = %.5f  V/Nc = %.2f  %.2f sec\n", 
+        run.meanIons, run.errIons, run.meanCols, run.errCols, run.rmsTravelError, V/Nc, time.count()*1e-9);
 
     return 1;
 }
-
 
 bool emc::HaveArg(string key)
 {

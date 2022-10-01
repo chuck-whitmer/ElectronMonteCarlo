@@ -1,5 +1,6 @@
 #pragma once
 #include "Vec3.h"
+#include "Vec7.h"
 #include "ParallelPlateChamber.h"
 
 class Electron
@@ -27,6 +28,9 @@ public:
 private:
 	void EulerStep(const Vec3& pos, const Vec3& vel, const double& s,
 		Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt);
+	void RungeKuttaStep(const Vec3& pos, const Vec3& vel, const double& s,
+		Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt);
+	Vec7 f(Vec7 x, ParallelPlateChamber& pp);
 	void PrintStatus(double t, Vec3& p, Vec3& v, ParallelPlateChamber& pp);
 	void PrintLocation(double t, Vec3& p);
 };

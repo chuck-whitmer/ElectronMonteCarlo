@@ -84,7 +84,7 @@ const uint32_t PseudoDES::testData[4][4] =
 
 bool PseudoDES::Test()
 {
-    printf("eMax is %llX\n", PseudoDES::eMax);
+    printf("eMax is %llX\n", *(int64_t *)&PseudoDES::eMax);
 
     bool bSuccess = true;
 
