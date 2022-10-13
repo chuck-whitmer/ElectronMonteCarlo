@@ -26,11 +26,14 @@ public:
 	void Scatter(double energyLoss, PseudoDES& rand);
 
 private:
-	void EulerStep(const Vec3& pos, const Vec3& vel, const double& s,
+	void EulerStep(const Vec3& pos, const Vec3& vel, double s,
 		Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt);
-	void RungeKuttaStep(const Vec3& pos, const Vec3& vel, const double& s,
+	void LeapFrogStep(const Vec3& pos0, const Vec3& vel0, double s0,
+		Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt);
+	void RungeKuttaStep(const Vec3& pos, const Vec3& vel, double s,
 		Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt);
 	Vec7 f(Vec7 x, ParallelPlateChamber& pp);
+	Vec3 acc(const Vec3& pos, ParallelPlateChamber& pp);
 	void PrintStatus(double t, Vec3& p, Vec3& v, ParallelPlateChamber& pp);
 	void PrintLocation(double t, Vec3& p);
 };

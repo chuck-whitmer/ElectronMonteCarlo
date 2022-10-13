@@ -68,15 +68,40 @@ double Electron::Travel(double sTarget, ParallelPlateChamber& pp, double dt)
 	return deltaE; // The amount by which energy was not conserved.
 }
 
-void Electron::EulerStep(const Vec3& pos, const Vec3& vel, const double& s, 
+void Electron::EulerStep(const Vec3& pos, const Vec3& vel, double s,
 	Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt)
 {
 	Vec7 x(pos, vel, s);
-//	Vec7 xdot(vel, -1.0 / m * pp.EField(pos), vel.Norm());
-	Vec7 x1 = x + f(x,pp) * stepDt;
+	//	Vec7 xdot(vel, -1.0 / m * pp.EField(pos), vel.Norm());
+	Vec7 x1 = x + f(x, pp) * stepDt;
 	pos1 = x1.pos;
 	vel1 = x1.vel;
 	s1 = x1.s;
+}
+/*
+void Electron::LeapFrogStep(const Vec3& pos0, const Vec3& vel0, double s0,
+	Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt)
+{
+	Vec3 a0(acc(pos0,pp));
+	pos1 = pos0 + vel0 * stepDt + a0 * (0.5 * stepDt * stepDt);
+	Vec3 a1(acc(pos1, pp));
+	vel1 = vel0 + (a0 + a1) * (0.5*stepDt);
+
+
+
+
+
+	Vec7 x(pos, vel, s);
+	//	Vec7 xdot(vel, -1.0 / m * pp.EField(pos), vel.Norm());
+	Vec7 x1 = x + f(x, pp) * stepDt;
+	pos1 = x1.pos;
+	vel1 = x1.vel;
+	s1 = x1.s;
+}
+*/
+Vec3 Electron::acc(const Vec3& pos, ParallelPlateChamber& pp)
+{
+	return Vec3(-1.0 / m * pp.EField(pos));
 }
 
 // f - Using the position and E-field info from pp, computes the time
@@ -87,7 +112,7 @@ Vec7 Electron::f(Vec7 x, ParallelPlateChamber& pp)
 	return Vec7(x.vel, -1.0 / m * pp.EField(x.pos), x.vel.Norm());
 }
 
-void Electron::RungeKuttaStep(const Vec3& pos, const Vec3& vel, const double& s,
+void Electron::RungeKuttaStep(const Vec3& pos, const Vec3& vel, double s,
 	Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt)
 {
 	Vec7 x(pos, vel, s);

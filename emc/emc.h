@@ -10,29 +10,20 @@ using std::unordered_map;
 
 class emc
 {
+	enum StepType {linear, log};
+
 	static unordered_map<string, string> args;
 
-	static double d; // meters
-	static double Ui; // eV
-	static double Nc;
-	static double Ni;
-	static int reps;
-	static int seed;
-	static bool showPath;
-
-	static double dt;
-
-	static double V; // Volts
-	static double lambda;
-	static double gamma;
 
 public:
 	static int main(int argc, char* argv[]);
 
 private:
+	static double Interpolate(double e1, double e2, int i, int steps, StepType t);
 	static bool ReadArgs(int argc, char* argv[]);
 	static bool GetArg(string key, double& e);
 	static bool GetArg(string key, int& e);
+	static bool GetArgRange(string key, double& e1, double& e2, StepType& t);
 	static bool HaveArg(string key);
 	static void ToLower(string& s);
 	static bool MaybeGetArg(string key, double& e);
