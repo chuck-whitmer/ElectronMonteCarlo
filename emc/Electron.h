@@ -24,6 +24,7 @@ public:
 
 	double Travel(double s, ParallelPlateChamber& pp, double dt);
 	void Scatter(double energyLoss, PseudoDES& rand);
+	void ForwardScatter(double energyLoss, double minCos, PseudoDES& rand);
 
 private:
 	void EulerStep(const Vec3& pos, const Vec3& vel, double s,

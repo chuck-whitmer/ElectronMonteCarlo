@@ -16,6 +16,33 @@ void Electron::Scatter(double energyLoss, PseudoDES& rand)
 	velocity = vMagnitude * Vec3(cosTheta, sinTheta * cos(phi), sinTheta * sin(phi));
 }
 
+// ForwardScatter
+//  Subtracts some energy and chooses a random scattered direction for the velocity.
+// Tends to scatter in a forward direction, determined by minCos which would have been -1.0 
+// for the isotropic scatter.
+
+void Electron::ForwardScatter(double energyLoss, double minCos, PseudoDES& rand)
+{
+	double newKineticEnergy = KineticEnergy() - energyLoss;
+	if (newKineticEnergy < 0.0)
+	{
+		velocity = Vec3::Zero;
+		return;
+	}
+	// Remember the original velocity direction as basis1.
+	// Construct two normal vectors to form a basis set.
+	Vec3 basis1 = velocity * (1.0 / velocity.Norm());
+	Vec3 basis2 = basis1.ConstructPerpendicular();
+	Vec3 basis3 = Vec3::Cross(basis1, basis2);
+
+	double cosTheta = (1.0 - minCos) * rand.RandomDouble() + minCos; // Rand in range minCos to 1.0
+	double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+	double phi = 2.0 * pi * rand.RandomDouble();
+
+	double vMagnitude = sqrt(2.0 * newKineticEnergy / m);
+	velocity = vMagnitude * (cosTheta*basis1 + (sinTheta*cos(phi))*basis2 + (sinTheta*sin(phi))*basis3);
+}
+
 // Travel
 //  Moves the electron a total distance sTarget along its path through the E-field.
 //  Returns the error from not conserving energy.

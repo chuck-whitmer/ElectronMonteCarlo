@@ -42,6 +42,8 @@ int emc::main(int argc, char *argv[])
     double dt2 = dt1;
     StepType dtStep = linear;
 
+    double minCos = -1.0;
+
     double V;
     double lambda;
 
@@ -52,6 +54,7 @@ int emc::main(int argc, char *argv[])
     if (!GetArgRange("ni", Ni1, Ni2, NiStep)) return 1;
     if (!GetArgRange("dt", dt1, dt2, dtStep)) return 1;
     if (!MaybeGetArg("ui", Ui)) return 1;
+    if (!MaybeGetArg("scatter", minCos)) return 1;
     if (!MaybeGetArg("gamma", gamma)) return 1;
     if (!GetArg("reps", reps)) return 1;
     if (!MaybeGetArg("seed", seed)) return 1;
@@ -80,7 +83,7 @@ int emc::main(int argc, char *argv[])
         ParallelPlateChamber pp(d, V);
 
         steady_clock::time_point start = steady_clock::now();
-        ElectronRunner run(lambda, Ui, pp, rand, reps, dt, showPath);
+        ElectronRunner run(lambda, Ui, pp, rand, reps, dt, showPath, minCos);
         steady_clock::time_point end = steady_clock::now();
         steady_clock::duration time = end - start;
 

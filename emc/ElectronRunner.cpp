@@ -5,7 +5,8 @@
 #include "Electron.h"
 
 
-ElectronRunner::ElectronRunner(double lambda, double Ui, ParallelPlateChamber& pp, PseudoDES& rand, int reps, double dt, bool showPath)
+ElectronRunner::ElectronRunner(double lambda, double Ui, ParallelPlateChamber& pp, PseudoDES& rand, int reps, 
+	double dt, bool showPath, double minCos)
 	: reps(reps)
 {
 	std::stack<Electron> stack;
@@ -54,13 +55,13 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, ParallelPlateChamber& p
 					stack.emplace(elec.position, Vec3::Zero);
 					nIonizations++;
 					// Scatter our electron, removing Ui of its energy.
-					elec.Scatter(Ui, rand);
+					elec.ForwardScatter(Ui, minCos, rand);
 				}
 				else
 				{
 					// Choose a smaller amount of energy to lose.
 					double deltaE = (0.1 + 0.4 * rand.RandomDouble()) * Ui;
-					elec.Scatter(deltaE, rand);
+					elec.ForwardScatter(deltaE, minCos, rand);
 				}
 			}
 		}

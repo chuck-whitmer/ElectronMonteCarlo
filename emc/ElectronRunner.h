@@ -12,6 +12,7 @@ public:
 	int reps;
 	double rmsTravelError;
 
-	ElectronRunner(double lambda, double Ui, ParallelPlateChamber& pp, PseudoDES& rand, int reps, double dt, bool showPath);
+	ElectronRunner(double lambda, double Ui, ParallelPlateChamber& pp, PseudoDES& rand, int reps, 
+		double dt, bool showPath, double minCos=-1.0);
 };
 
