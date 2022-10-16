@@ -1,6 +1,8 @@
 #include <iostream>
 #include <chrono>
 #include <cmath>
+#include <string>
+#include <vector>
 #include "emc.h"
 #include "PseudoDES.h"
 #include "ParallelPlateChamber.h"
@@ -44,6 +46,8 @@ int emc::main(int argc, char *argv[])
 
     double minCos = -1.0;
 
+    bool mathematicaOutput = false;
+
     double V;
     double lambda;
 
@@ -60,13 +64,17 @@ int emc::main(int argc, char *argv[])
     if (!MaybeGetArg("seed", seed)) return 1;
     if (!MaybeGetArg("steps", steps)) return 1;
     if (!MaybeGetBoolArg("showpath", showPath)) return 1;
+    if (!MaybeGetBoolArg("mathematica", mathematicaOutput)) return 1;
 
     if (steps == 1 && (Nc1 != Nc2 || Ni1 != Ni2 || d1 != d2 || dt1 != dt2)) steps = 2;
 
-    printf("Command line: emc");
+    char buf[128];
+    std::vector<string> mathematicaListing;
+
+    fprintf(stderr, "Command line: emc");
     for (int i = 1; i < argc; i++)
-        printf(" %s", argv[i]);
-    printf("\n\n");
+        fprintf(stderr, " %s", argv[i]);
+    fprintf(stderr, "\n\n");
 
     PseudoDES rand(1, seed);
 
@@ -87,9 +95,22 @@ int emc::main(int argc, char *argv[])
         steady_clock::time_point end = steady_clock::now();
         steady_clock::duration time = end - start;
 
+        if (mathematicaOutput)
+        {
+            sprintf_s(buf, sizeof buf, "  {%.3f,%.3f,{%.2f,%.2f}}%s\n", Ni, Nc, run.meanIons, run.errIons, (i<steps-1)?",":"");
+            mathematicaListing.emplace_back(buf);
+        }
         printf("Ni %.3f Nc %.3f d %.3f dt %.2e ions %.2f +- %.2f  cols %.2f +- %.2f  rte %.5f  V/Nc %.2f  %.2f sec\n",
             Ni, Nc, d, dt,
             run.meanIons, run.errIons, run.meanCols, run.errCols, run.rmsTravelError, V / Nc, time.count() * 1e-9);
+    }
+    if (mathematicaOutput)
+    {
+        printf("\n");
+        printf("{\n");
+        for (string s : mathematicaListing)
+            printf(s.c_str());
+        printf("}\n");
     }
     return 1;
 }
