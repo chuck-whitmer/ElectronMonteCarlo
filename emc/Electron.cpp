@@ -48,7 +48,7 @@ void Electron::ForwardScatter(double energyLoss, double minCos, PseudoDES& rand)
 //  Returns the error from not conserving energy.
 // (If this is too large, then dt will need to be smaller.)
 
-double Electron::Travel(double sTarget, ParallelPlateChamber& pp, double dt)
+double Electron::Travel(double sTarget, Geometry& pp, double dt)
 {
 	double time = 0.0;
 	Vec3 p0 = position;
@@ -96,7 +96,7 @@ double Electron::Travel(double sTarget, ParallelPlateChamber& pp, double dt)
 }
 
 void Electron::EulerStep(const Vec3& pos, const Vec3& vel, double s,
-	Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt)
+	Vec3& pos1, Vec3& vel1, double& s1, Geometry& pp, double stepDt)
 {
 	Vec7 x(pos, vel, s);
 	//	Vec7 xdot(vel, -1.0 / m * pp.EField(pos), vel.Norm());
@@ -126,7 +126,7 @@ void Electron::LeapFrogStep(const Vec3& pos0, const Vec3& vel0, double s0,
 	s1 = x1.s;
 }
 */
-Vec3 Electron::acc(const Vec3& pos, ParallelPlateChamber& pp)
+Vec3 Electron::acc(const Vec3& pos, Geometry& pp)
 {
 	return Vec3(-1.0 / m * pp.EField(pos));
 }
@@ -134,13 +134,13 @@ Vec3 Electron::acc(const Vec3& pos, ParallelPlateChamber& pp)
 // f - Using the position and E-field info from pp, computes the time
 // derivative of the Vec7.
 
-Vec7 Electron::f(Vec7 x, ParallelPlateChamber& pp)
+Vec7 Electron::f(Vec7 x, Geometry& pp)
 {
 	return Vec7(x.vel, -1.0 / m * pp.EField(x.pos), x.vel.Norm());
 }
 
 void Electron::RungeKuttaStep(const Vec3& pos, const Vec3& vel, double s,
-	Vec3& pos1, Vec3& vel1, double& s1, ParallelPlateChamber& pp, double stepDt)
+	Vec3& pos1, Vec3& vel1, double& s1, Geometry& pp, double stepDt)
 {
 	Vec7 x(pos, vel, s);
 	Vec7 k1 = f(x, pp);
@@ -153,7 +153,7 @@ void Electron::RungeKuttaStep(const Vec3& pos, const Vec3& vel, double s,
 	s1 = x1.s;
 }
 
-void Electron::PrintStatus(double t, Vec3& p, Vec3& v, ParallelPlateChamber& pp)
+void Electron::PrintStatus(double t, Vec3& p, Vec3& v, Geometry& pp)
 {
 	printf("%8.5f :", t);
 	printf(" %10.7f %10.7f %10.7f :", p.x, p.y, p.z);

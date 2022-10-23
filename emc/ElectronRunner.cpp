@@ -5,7 +5,7 @@
 #include "Electron.h"
 
 
-ElectronRunner::ElectronRunner(double lambda, double Ui, ParallelPlateChamber& pp, PseudoDES& rand, int reps, 
+ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES& rand, int reps, 
 	double dt, bool showPath, double minCos)
 	: reps(reps)
 {

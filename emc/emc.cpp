@@ -6,6 +6,7 @@
 #include "emc.h"
 #include "PseudoDES.h"
 #include "ParallelPlateChamber.h"
+#include "SphereInSphere.h"
 #include "ElectronRunner.h"
 #include "Electron.h"
 
@@ -48,23 +49,36 @@ int emc::main(int argc, char *argv[])
 
     bool mathematicaOutput = false;
 
+    string shape = "pp";  // Default to ParallelPlates.
+    double r1 = .02;
+    double r2 = .07;
+
     double V;
     double lambda;
 
     if (!ReadArgs(argc, argv)) return 1;
 
-    if (!GetArgRange("d", d1, d2, dStep)) return 1;
+    if (!MaybeGetArgRange("d", d1, d2, dStep)) return 1;
     if (!GetArgRange("nc", Nc1, Nc2, NcStep)) return 1;
     if (!GetArgRange("ni", Ni1, Ni2, NiStep)) return 1;
     if (!GetArgRange("dt", dt1, dt2, dtStep)) return 1;
     if (!MaybeGetArg("ui", Ui)) return 1;
     if (!MaybeGetArg("scatter", minCos)) return 1;
     if (!MaybeGetArg("gamma", gamma)) return 1;
+    if (!MaybeGetArg("r1", r1)) return 1;
+    if (!MaybeGetArg("r2", r2)) return 1;
     if (!GetArg("reps", reps)) return 1;
     if (!MaybeGetArg("seed", seed)) return 1;
     if (!MaybeGetArg("steps", steps)) return 1;
     if (!MaybeGetBoolArg("showpath", showPath)) return 1;
     if (!MaybeGetBoolArg("mathematica", mathematicaOutput)) return 1;
+
+    MaybeGetArg("shape", shape);
+    if (shape != "pp" && shape != "ss")
+    {
+        printf("Unknown shape %s\n", shape);
+        return 1;
+    }
 
     if (steps == 1 && (Nc1 != Nc2 || Ni1 != Ni2 || d1 != d2 || dt1 != dt2)) steps = 2;
 
@@ -77,6 +91,7 @@ int emc::main(int argc, char *argv[])
     fprintf(stderr, "\n\n");
 
     PseudoDES rand(1, seed);
+    Geometry* geom = nullptr;
 
     for (int i = 0; i < steps; i++)
     {
@@ -85,13 +100,24 @@ int emc::main(int argc, char *argv[])
         double d = Interpolate(d1, d2, i, steps, dStep);
         double dt = Interpolate(dt1, dt2, i, steps, dtStep);
 
-        lambda = d / Nc;
         V = Ni * Ui;
 
-        ParallelPlateChamber pp(d, V);
+        if (shape == "pp")
+        {
+            delete geom;
+            geom = new ParallelPlate(d1, V);
+            lambda = d / Nc;
+        }
+        else if (shape == "ss")
+        {
+            delete geom;
+            geom = new SphereInSphere(r1, r2, V);
+            lambda = (r2 - r1) / Nc;
+            d = r2 - r1;
+        }
 
         steady_clock::time_point start = steady_clock::now();
-        ElectronRunner run(lambda, Ui, pp, rand, reps, dt, showPath, minCos);
+        ElectronRunner run(lambda, Ui, *geom, rand, reps, dt, showPath, minCos);
         steady_clock::time_point end = steady_clock::now();
         steady_clock::duration time = end - start;
 
@@ -112,6 +138,7 @@ int emc::main(int argc, char *argv[])
             printf(s.c_str());
         printf("}\n");
     }
+    delete geom;
     return 1;
 }
 
@@ -146,6 +173,12 @@ bool emc::MaybeGetArg(string key, int& e)
     return GetArg(key, e);
 }
 
+bool emc::MaybeGetArg(string key, string& s)
+{
+    if (!HaveArg(key)) return true;
+    return GetArg(key, s);
+}
+
 bool emc::MaybeGetBoolArg(string key, bool& e)
 {
     bool success = true;
@@ -164,6 +197,12 @@ bool emc::MaybeGetBoolArg(string key, bool& e)
         }
     }
     return success;
+}
+
+bool emc::MaybeGetArgRange(string key, double& e1, double& e2, StepType& t)
+{
+    if (!HaveArg(key)) return true;
+    return GetArgRange(key, e1, e2, t);
 }
 
 bool emc::GetArgRange(string key, double& e1, double& e2, StepType& t)
@@ -214,13 +253,25 @@ bool emc::GetArgRange(string key, double& e1, double& e2, StepType& t)
     }
 }
 
-
-
 bool emc::GetArg(string key, double& e)
 {
     try
     {
         e = std::stod(args[key]);
+        return true;
+    }
+    catch (...)
+    {
+        printf("No valid value entered for %s\n", key.c_str());
+        return false;
+    }
+}
+
+bool emc::GetArg(string key, string& s)
+{
+    try
+    {
+        s = args[key];
         return true;
     }
     catch (...)

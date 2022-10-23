@@ -1,17 +1,17 @@
 #pragma once
 #include "Vec3.h"
 #include "PseudoDES.h"
+#include "Geometry.h"
 
-class ParallelPlateChamber
+class ParallelPlate : public Geometry
 {
 public:
 	double d;
-	double V;
 
-	ParallelPlateChamber(double d, double v) : d(d), V(v)
+	ParallelPlate(double d, double v) : d(d), Geometry(v)
 	{}
 
-	Vec3 CathodeStart(PseudoDES& rand)
+	Vec3 CathodeStart(PseudoDES& rand) const
 	{
 		return Vec3(d * 1e-9, 0.0, 0.0);
 	}
@@ -39,4 +39,3 @@ public:
 		return (d - r.x) * -V / d;
 	}
 };
-

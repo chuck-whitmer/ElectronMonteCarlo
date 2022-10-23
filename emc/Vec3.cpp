@@ -1,3 +1,4 @@
+#include <cmath>
 #include "Vec3.h"
 
 const Vec3 Vec3::Zero(0.0, 0.0, 0.0);

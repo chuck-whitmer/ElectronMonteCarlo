@@ -23,7 +23,10 @@ private:
 	static bool ReadArgs(int argc, char* argv[]);
 	static bool GetArg(string key, double& e);
 	static bool GetArg(string key, int& e);
+	static bool MaybeGetArg(string key, string& s);
+	static bool GetArg(string key, string& s);
 	static bool GetArgRange(string key, double& e1, double& e2, StepType& t);
+	static bool MaybeGetArgRange(string key, double& e1, double& e2, StepType& t);
 	static bool HaveArg(string key);
 	static void ToLower(string& s);
 	static bool MaybeGetArg(string key, double& e);
