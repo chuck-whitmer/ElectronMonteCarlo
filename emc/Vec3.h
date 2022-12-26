@@ -40,6 +40,12 @@ public:
 
 	Vec3 ConstructPerpendicular() const;
 
+	Vec3 Unit() const
+	{
+		double norm = Norm();
+		return Vec3(x / norm, y / norm, z / norm);
+	}
+
 	static double Dot(const Vec3& a, const Vec3& b)
 	{
 		return a.x * b.x + a.y * b.y + a.y * b.y;

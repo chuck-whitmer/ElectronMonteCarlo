@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,6 +123,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>MaxSpeed</Optimization>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,23 +136,31 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Convert.cpp" />
+    <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="Electron.cpp" />
     <ClCompile Include="ElectronRunner.cpp" />
     <ClCompile Include="emc.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="MyFile.cpp" />
     <ClCompile Include="ParallelPlateChamber.cpp" />
     <ClCompile Include="PseudoDES.cpp" />
     <ClCompile Include="SphereInSphere.cpp" />
+    <ClCompile Include="SphereInSphereFromFile.cpp" />
     <ClCompile Include="Vec3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Convert.h" />
+    <ClInclude Include="Cylinder.h" />
     <ClInclude Include="Electron.h" />
     <ClInclude Include="ElectronRunner.h" />
     <ClInclude Include="emc.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="MyFile.h" />
     <ClInclude Include="ParallelPlateChamber.h" />
     <ClInclude Include="PseudoDES.h" />
     <ClInclude Include="SphereInSphere.h" />
+    <ClInclude Include="SphereInSphereFromFile.h" />
     <ClInclude Include="Vec3.h" />
     <ClInclude Include="Vec7.h" />
   </ItemGroup>

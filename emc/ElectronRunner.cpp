@@ -17,6 +17,7 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 	double sumCols2 = 0.0;
 	int nTravelError = 0;
 	double sumTravelError2 = 0.0;
+	double sumPath = 0.0;
 
 	for (int iRep = 0; iRep < reps; iRep++)
 	{
@@ -46,6 +47,7 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 
 				// If we have passed the anode, then quit.
 				if (pp.OutsideAnode(elec.position)) break;
+				sumPath += s;
 
 				// We are at a collision. Ionize or not.
 				nCollisions++;
@@ -72,6 +74,7 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 		sumCols += cols;
 		sumCols2 += cols * cols;
 	}
+	double meanPath = sumPath / reps / lambda ;
 	meanIons = sumIons / reps;
 	double stdDevIons = sqrt(sumIons2 / reps - meanIons * meanIons);
 	errIons = stdDevIons / sqrt((double)reps);
@@ -79,4 +82,5 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 	double stdDevCols = sqrt(sumCols2 / reps - meanCols * meanCols);
 	errCols = stdDevCols / sqrt((double)reps);
 	rmsTravelError = sqrt(sumTravelError2 / nTravelError);
+	printf("meanPath = %.7f\n", meanPath);
 }

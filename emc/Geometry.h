@@ -12,6 +12,11 @@ public:
 
 	virtual ~Geometry() {}
 
+	void SetV(double v)
+	{
+		V = v;
+	}
+
 	virtual Vec3 CathodeStart(PseudoDES& rand) const = 0;
 	virtual bool InsideCathode(const Vec3& r) const = 0;
 	virtual bool OutsideAnode(const Vec3& r) const = 0;

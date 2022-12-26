@@ -36,6 +36,6 @@ private:
 	Vec7 f(Vec7 x, Geometry& pp);
 	Vec3 acc(const Vec3& pos, Geometry& pp);
 	void PrintStatus(double t, Vec3& p, Vec3& v, Geometry& pp);
-	void PrintLocation(double t, Vec3& p);
+	void PrintLocation(double t, Vec3& p, Vec3& v);
 };
 

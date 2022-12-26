@@ -13,6 +13,7 @@ class emc
 	enum StepType {linear, log};
 
 	static unordered_map<string, string> args;
+	static string usage;
 
 
 public:
@@ -32,4 +33,5 @@ private:
 	static bool MaybeGetArg(string key, double& e);
 	static bool MaybeGetArg(string key, int& e);
 	static bool MaybeGetBoolArg(string key, bool& e);
+	static void PrintUsage();
 };

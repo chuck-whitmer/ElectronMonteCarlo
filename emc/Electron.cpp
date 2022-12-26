@@ -62,7 +62,7 @@ double Electron::Travel(double sTarget, Geometry& pp, double dt)
 	Vec3 v1;
 	double s1;
 
-	if (showPath) PrintLocation(time, p0);
+	if (showPath) PrintLocation(time, p0, v0);
 
 	while (true)
 	{
@@ -73,7 +73,7 @@ double Electron::Travel(double sTarget, Geometry& pp, double dt)
 		v0 = v1;
 		s0 = s1;
 		time += dt;
-		if (showPath) PrintLocation(time, p0);
+		if (showPath) PrintLocation(time, p0, v0);
 	}
 	double dtLast = (sTarget - s0) / (s1 - s0) * dt;
 	EulerStep(p0, v0, s0, p1, v1, s1, pp, dtLast);
@@ -81,7 +81,7 @@ double Electron::Travel(double sTarget, Geometry& pp, double dt)
 	time += dtLast;
 	if (showPath)
 	{
-		PrintLocation(time, p1);
+		PrintLocation(time, p1, v1);
 		printf("\n");
 	}
 
@@ -163,9 +163,9 @@ void Electron::PrintStatus(double t, Vec3& p, Vec3& v, Geometry& pp)
 	printf(" %.7f %.7f %.7f\n", pe, ke, pe + ke);
 }
 
-void Electron::PrintLocation(double t, Vec3& p)
+void Electron::PrintLocation(double t, Vec3& p, Vec3& v)
 {
-	printf("%8.5f : %10.7f %10.7f %10.7f\n", t, p.x, p.y, p.z);
+	printf("%8.5f : %18.15f %18.15f %18.15f  %18.15f %18.15f %18.15f\n", t, p.x, p.y, p.z, v.x, v.y, v.z);
 }
 
 

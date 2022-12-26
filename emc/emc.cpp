@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ostream>
 #include <chrono>
 #include <cmath>
 #include <string>
@@ -7,6 +8,7 @@
 #include "PseudoDES.h"
 #include "ParallelPlateChamber.h"
 #include "SphereInSphere.h"
+#include "SphereInSphereFromFile.h"
 #include "ElectronRunner.h"
 #include "Electron.h"
 
@@ -53,6 +55,9 @@ int emc::main(int argc, char *argv[])
     double r1 = .02;
     double r2 = .07;
 
+    string phiFile;
+    bool havePhiFile = false;
+
     double V;
     double lambda;
 
@@ -74,10 +79,18 @@ int emc::main(int argc, char *argv[])
     if (!MaybeGetBoolArg("mathematica", mathematicaOutput)) return 1;
 
     MaybeGetArg("shape", shape);
-    if (shape != "pp" && shape != "ss")
+    if (shape != "pp" && shape != "ss" && shape != "ssf" && shape != "cyl")
     {
-        printf("Unknown shape %s\n", shape);
+        printf("Unknown shape %s\n", shape.c_str());
         return 1;
+    }
+    if (shape == "ssf")
+    {
+        if (!MaybeGetArg("phifile", phiFile))
+        {
+            printf("ssf type requires a phiFile\n");
+            return 1;
+        }
     }
 
     if (steps == 1 && (Nc1 != Nc2 || Ni1 != Ni2 || d1 != d2 || dt1 != dt2)) steps = 2;
@@ -93,6 +106,19 @@ int emc::main(int argc, char *argv[])
     PseudoDES rand(1, seed);
     Geometry* geom = nullptr;
 
+    if (shape == "ssf")
+    {
+        try
+        {
+            geom = new SphereInSphereFromFile(r1, r2, phiFile);
+        }
+        catch (std::exception& e)
+        {
+            fprintf(stderr,"File error: %s\n", e.what());
+            return 1;
+        }
+    }
+    
     for (int i = 0; i < steps; i++)
     {
         double Ni = Interpolate(Ni1, Ni2, i, steps, NiStep);
@@ -114,6 +140,11 @@ int emc::main(int argc, char *argv[])
             geom = new SphereInSphere(r1, r2, V);
             lambda = (r2 - r1) / Nc;
             d = r2 - r1;
+        }
+        else if (shape == "ssf")
+        {
+            lambda = (r2 - r1) / Nc;
+            geom->SetV(V);
         }
 
         steady_clock::time_point start = steady_clock::now();
@@ -307,6 +338,11 @@ bool emc::ReadArgs(int argc, char* argv[])
     {
         // Look for "key=value"
         string arg(argv[ii]);
+        if (arg == "--help")
+        {
+            PrintUsage();
+            return false;
+        }
         size_t eq = arg.find('=');
         if (eq > 0 && eq < arg.length()-1 && eq != string::npos)
         {
@@ -324,8 +360,47 @@ bool emc::ReadArgs(int argc, char* argv[])
         else
         {
             printf("Bad command line option %s.\n", arg.c_str());
+            PrintUsage();
             success = false;
         }
     }
     return success;
 }
+
+void emc::PrintUsage()
+{
+    printf(usage.c_str());
+}
+
+string emc::usage=R"(
+emc - Electron Monte Carlo
+
+For help: --help
+
+variable=value
+variable=value1,value2 - for linear range
+variable=value1,value2R - for linear range
+variable=value1,value2L - for logarithmic range
+
+Variables to set:
+
+d            - For parallel plates (meters)
+r1           - For sphere in sphere (meters)
+r2           - For sphere in sphere (meters)
+Nc           - Number of collision lengths
+Ni           - Number of ionization lengths
+dt           - Euler time step (meters/c)
+Ui           - Ionization energy (eV, default 15)
+scatter      - Minimum cosine for forward scattering (default 0)
+gamma        - Ion to electron creation rate (default 0.02)
+reps         - Number of electrons to launch
+seed         - Serial random number seed
+steps        - Steps for range searching
+showpath     - For diagnostics, true or false
+mathematica  - To format for Mathematica, true or false
+shape        - pp for parallel plates, ss for sphere-in-sphere
+
+Sample command line:
+
+emc shape=pp d=.05 nc=10 ni=10 reps=100 seed=3 scatter=.8 dt=1e-3
+)";
