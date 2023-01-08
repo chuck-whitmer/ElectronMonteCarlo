@@ -9,6 +9,7 @@
 #include "ParallelPlateChamber.h"
 #include "SphereInSphere.h"
 #include "SphereInSphereFromFile.h"
+#include "Cylinder.h"
 #include "ElectronRunner.h"
 #include "Electron.h"
 
@@ -54,6 +55,7 @@ int emc::main(int argc, char *argv[])
     string shape = "pp";  // Default to ParallelPlates.
     double r1 = .02;
     double r2 = .07;
+    double h = .073;
 
     string phiFile;
     bool havePhiFile = false;
@@ -72,6 +74,7 @@ int emc::main(int argc, char *argv[])
     if (!MaybeGetArg("gamma", gamma)) return 1;
     if (!MaybeGetArg("r1", r1)) return 1;
     if (!MaybeGetArg("r2", r2)) return 1;
+    if (!MaybeGetArg("h", h)) return 1;
     if (!GetArg("reps", reps)) return 1;
     if (!MaybeGetArg("seed", seed)) return 1;
     if (!MaybeGetArg("steps", steps)) return 1;
@@ -79,16 +82,16 @@ int emc::main(int argc, char *argv[])
     if (!MaybeGetBoolArg("mathematica", mathematicaOutput)) return 1;
 
     MaybeGetArg("shape", shape);
-    if (shape != "pp" && shape != "ss" && shape != "ssf" && shape != "cyl")
+    if (shape != "pp" && shape != "ss" && shape != "ssf" && shape != "scf")
     {
         printf("Unknown shape %s\n", shape.c_str());
         return 1;
     }
-    if (shape == "ssf")
+    if (shape == "ssf" || shape == "scf")
     {
         if (!MaybeGetArg("phifile", phiFile))
         {
-            printf("ssf type requires a phiFile\n");
+            printf("%s type requires a phiFile\n", shape.c_str());
             return 1;
         }
     }
@@ -114,11 +117,23 @@ int emc::main(int argc, char *argv[])
         }
         catch (std::exception& e)
         {
-            fprintf(stderr,"File error: %s\n", e.what());
+            fprintf(stderr, "File error: %s\n", e.what());
             return 1;
         }
     }
-    
+    else if (shape == "scf")
+    {
+        try
+        {
+            geom = new Cylinder(r1, r2, h, phiFile);
+        }
+        catch (std::exception& e)
+        {
+            fprintf(stderr, "File error: %s\n", e.what());
+            return 1;
+        }
+    }
+
     for (int i = 0; i < steps; i++)
     {
         double Ni = Interpolate(Ni1, Ni2, i, steps, NiStep);
@@ -141,7 +156,7 @@ int emc::main(int argc, char *argv[])
             lambda = (r2 - r1) / Nc;
             d = r2 - r1;
         }
-        else if (shape == "ssf")
+        else if (shape == "ssf" || shape == "scf")
         {
             lambda = (r2 - r1) / Nc;
             geom->SetV(V);
