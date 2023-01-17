@@ -158,6 +158,7 @@
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="MyFile.h" />
     <ClInclude Include="ParallelPlateChamber.h" />
+    <ClInclude Include="Polynomial.h" />
     <ClInclude Include="PseudoDES.h" />
     <ClInclude Include="SphereInSphere.h" />
     <ClInclude Include="SphereInSphereFromFile.h" />

@@ -6,7 +6,7 @@
 
 
 ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES& rand, int reps, 
-	double dt, bool showPath, double minCos)
+	double dt, int nShow, double minCos)
 	: reps(reps)
 {
 	std::stack<Electron> stack;
@@ -21,15 +21,19 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 
 	for (int iRep = 0; iRep < reps; iRep++)
 	{
+		//printf("%d\r", iRep+1);
 		int nIonizations = 0;
 		int nCollisions = 0;
 
 		// Push the first electron.
 		stack.emplace(pp.CathodeStart(rand), Vec3::Zero);
-		if (showPath) stack.top().showPath = true;
+		//if (nShow == -1 || nShow == iRep+1) stack.top().showPath = true;
+		bool doShow = nShow == -1 || nShow == iRep + 1;
+		double eCount = 0.0;
 
 		while (!stack.empty())
 		{
+			eCount += 1.0;
 			// Get the next electron to work on.
 			Electron elec = stack.top(); stack.pop();
 			//if (showPath) elec.showPath = true;
@@ -41,7 +45,9 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 				double s = -lambda * log(1.0 - rand.RandomDouble());
 
 				// Move the electron a distance s.
+				if (doShow) elec.PrintLocation(eCount);
 				double error = elec.Travel(s, pp, dt);
+				if (doShow) elec.PrintLocation(eCount+0.1);
 				nTravelError++;
 				sumTravelError2 += error * error;
 
@@ -66,6 +72,11 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 					elec.ForwardScatter(deltaE, minCos, rand);
 				}
 			}
+			if (doShow)
+			{
+				elec.PrintLocation(eCount);
+				printf("\n");
+			}
 		}
 		double ions = nIonizations;
 		sumIons += ions;
@@ -74,6 +85,7 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 		sumCols += cols;
 		sumCols2 += cols * cols;
 	}
+	printf("\n");
 	double meanPath = sumPath / reps / lambda ;
 	meanIons = sumIons / reps;
 	double stdDevIons = sqrt(sumIons2 / reps - meanIons * meanIons);

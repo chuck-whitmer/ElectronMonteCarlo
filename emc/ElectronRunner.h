@@ -13,6 +13,6 @@ public:
 	double rmsTravelError;
 
 	ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES& rand, int reps, 
-		double dt, bool showPath, double minCos=-1.0);
+		double dt, int showPath, double minCos=-1.0);
 };
 

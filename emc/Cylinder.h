@@ -24,10 +24,7 @@ public:
 		delete[] _phi;
 	}
 
-	Vec3 CathodeStart(PseudoDES& rand) const override
-	{
-		return Vec3(r1 + (r2 - r1) * 1e-9, 0.0, 0.0);
-	}
+	Vec3 CathodeStart(PseudoDES& rand) const override;
 
 	bool InsideCathode(const Vec3& r) const override
 	{

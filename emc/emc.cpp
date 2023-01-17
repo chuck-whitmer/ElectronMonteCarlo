@@ -12,6 +12,7 @@
 #include "Cylinder.h"
 #include "ElectronRunner.h"
 #include "Electron.h"
+#include "Polynomial.h"
 
 using std::chrono::steady_clock;
 
@@ -24,6 +25,14 @@ unordered_map<string, string> emc::args;
 
 int emc::main(int argc, char *argv[])
 {
+    Polynomial p0(std::vector<double>{ 1.0 });
+    Polynomial p2({ -0.5, 0.0, 1.5 });
+    Polynomial p4({ 3.0 / 8.0, 0.0, -30.0 / 8.0, 0.0, 35.0 / 8.0 });
+
+
+
+
+
     double d1 = 5.0e-2;  // 5 cm
     double d2 = d1;
     StepType dStep = linear;
@@ -43,6 +52,7 @@ int emc::main(int argc, char *argv[])
     int seed = 1;
     int steps = 1;
     bool showPath = false;
+    int nShowPath = 0;
 
     double dt1 = 1.0;
     double dt2 = dt1;
@@ -79,6 +89,7 @@ int emc::main(int argc, char *argv[])
     if (!MaybeGetArg("seed", seed)) return 1;
     if (!MaybeGetArg("steps", steps)) return 1;
     if (!MaybeGetBoolArg("showpath", showPath)) return 1;
+    if (showPath) if (!MaybeGetArg("pathnum", nShowPath)) return 1;
     if (!MaybeGetBoolArg("mathematica", mathematicaOutput)) return 1;
 
     MaybeGetArg("shape", shape);
@@ -162,8 +173,14 @@ int emc::main(int argc, char *argv[])
             geom->SetV(V);
         }
 
+        int nShow = 0;
+        if (showPath)
+        {
+            nShow = (nShowPath != 0) ? nShowPath : -1;
+        }
+
         steady_clock::time_point start = steady_clock::now();
-        ElectronRunner run(lambda, Ui, *geom, rand, reps, dt, showPath, minCos);
+        ElectronRunner run(lambda, Ui, *geom, rand, reps, dt, nShow, minCos);
         steady_clock::time_point end = steady_clock::now();
         steady_clock::duration time = end - start;
 

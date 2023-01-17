@@ -35,6 +35,18 @@ Cylinder::Cylinder(double r1, double r2, double h, string phiFile) : r1(r1), r2(
 	printf("%d x %d array, spacing %.7fm\n\n", nRows, nCols, latticeSpacing);
 }
 
+Vec3 Cylinder::CathodeStart(PseudoDES& rand) const
+{
+	static const double twoPi = 2.0 * 3.14159265358979323;
+	double cosTheta = 2.0 * rand.RandomDouble() - 1.0;
+	double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+	double phi = twoPi * rand.RandomDouble();
+	double sinPhi = sin(phi);
+	double cosPhi = cos(phi);
+
+	return (r1 + (r2 - r1) * 1e-9) * Vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosTheta);
+}
+
 double Cylinder::phiVertex(int i, int j) const
 {
 	// For convenience we allow asking for phiVertex[i,j] even with negative coordinates.
