@@ -134,9 +134,14 @@ int emc::main(int argc, char *argv[])
     }
     else if (shape == "scf")
     {
+        if (HaveArg("r1") || HaveArg("r2") || HaveArg("h"))
+            throw std::invalid_argument("We will get r1, r2, and h from the phi file");
         try
         {
-            geom = new Cylinder(r1, r2, h, phiFile);
+            geom = new Cylinder(phiFile);
+            r1 = ((Cylinder*)geom)->r1;
+            r2 = ((Cylinder*)geom)->r2;
+            h = ((Cylinder*)geom)->h;
         }
         catch (std::exception& e)
         {
