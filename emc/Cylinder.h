@@ -18,7 +18,7 @@ class Cylinder : public Geometry
 public:
 	double r1, r2, h;
 
-	Cylinder(double r1, double r2, double h, string phiFile);
+	Cylinder(string phiFile);
 	~Cylinder()
 	{
 		delete[] _phi;

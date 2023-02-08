@@ -3,7 +3,7 @@
 
 using std::vector;
 
-Cylinder::Cylinder(double r1, double r2, double h, string phiFile) : r1(r1), r2(r2), h(h), Geometry(1.0)
+Cylinder::Cylinder(string phiFile) : Geometry(1.0)
 {
 	if (!std::filesystem::exists(phiFile))
 		throw std::invalid_argument("Invalid filename");
@@ -17,22 +17,29 @@ Cylinder::Cylinder(double r1, double r2, double h, string phiFile) : r1(r1), r2(
 	if (file.ReadLineOfWords(words) != 2 || words[0] != "type" || words[1] != "cylindrical")
 		throw std::invalid_argument("Unrecognized file type");
 	vector<double> values;
-	if (file.ReadLineOfValues(values) != 3
+	if (file.ReadLineOfValues(values) != 4
 		|| floor(values[0]) != values[0] || values[0] <= 0.0
 		|| floor(values[1]) != values[1] || values[1] <= 0.0
 		|| values[2] <= 0.0
+		|| floor(values[3]) != values[3] || values[3] <= 0.0
 		)
 		throw std::invalid_argument("Invalid dimension parameters");
 	nRows = (int)floor(values[0]);
 	nCols = (int)floor(values[1]);
 	latticeSpacing = values[2];
+	int rInner = (int)floor(values[3]);
+
+	r1 = latticeSpacing * rInner;
+	r2 = latticeSpacing * (nCols - 1);
+	h = latticeSpacing * (nRows - 1);
 
 	_phi = new double[nRows * nCols];
 
 	file.ReadValues(_phi, nRows * nCols);
 	printf("Loaded phi file %s\n", phiFile.c_str());
 	printf("%s\n", title.c_str());
-	printf("%d x %d array, spacing %.7fm\n\n", nRows, nCols, latticeSpacing);
+	printf("%d x %d array, spacing %.7fm, %d\n\n", nRows, nCols, latticeSpacing, rInner);
+	printf("r1 = %.4f  r2 = %.4f  h = %.4f\n", r1, r2, h);
 }
 
 Vec3 Cylinder::CathodeStart(PseudoDES& rand) const

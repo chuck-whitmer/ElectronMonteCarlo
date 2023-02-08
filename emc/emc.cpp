@@ -12,7 +12,7 @@
 #include "Cylinder.h"
 #include "ElectronRunner.h"
 #include "Electron.h"
-#include "Polynomial.h"
+#include "Legendre.h"
 
 using std::chrono::steady_clock;
 
@@ -25,12 +25,9 @@ unordered_map<string, string> emc::args;
 
 int emc::main(int argc, char *argv[])
 {
-    Polynomial p0(std::vector<double>{ 1.0 });
-    Polynomial p2({ -0.5, 0.0, 1.5 });
-    Polynomial p4({ 3.0 / 8.0, 0.0, -30.0 / 8.0, 0.0, 35.0 / 8.0 });
-
-
-
+    Legendre p10(10);
+    for (int i = 0; i < 11; i++)
+        printf("%.6f\n", p10.eval(i / 10.0));
 
 
     double d1 = 5.0e-2;  // 5 cm

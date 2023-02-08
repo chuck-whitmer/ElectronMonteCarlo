@@ -142,6 +142,7 @@
     <ClCompile Include="ElectronRunner.cpp" />
     <ClCompile Include="emc.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="Legendre.cpp" />
     <ClCompile Include="MyFile.cpp" />
     <ClCompile Include="ParallelPlateChamber.cpp" />
     <ClCompile Include="PseudoDES.cpp" />
@@ -156,9 +157,9 @@
     <ClInclude Include="ElectronRunner.h" />
     <ClInclude Include="emc.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="Legendre.h" />
     <ClInclude Include="MyFile.h" />
     <ClInclude Include="ParallelPlateChamber.h" />
-    <ClInclude Include="Polynomial.h" />
     <ClInclude Include="PseudoDES.h" />
     <ClInclude Include="SphereInSphere.h" />
     <ClInclude Include="SphereInSphereFromFile.h" />
