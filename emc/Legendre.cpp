@@ -24,7 +24,16 @@ double Legendre::eval(double x) const
 {
 	int n = innerP.size();
 	double sum = innerP[n - 1];
-	for (int i = n-2; i >= 0; i--)
-		sum = x*sum + innerP[i];
+	for (int i = n - 2; i >= 0; i--)
+		sum = x * sum + innerP[i];
+	return sum;
+}
+
+double Legendre::operator()(double x) const
+{
+	int n = innerP.size();
+	double sum = innerP[n - 1];
+	for (int i = n - 2; i >= 0; i--)
+		sum = x * sum + innerP[i];
 	return sum;
 }

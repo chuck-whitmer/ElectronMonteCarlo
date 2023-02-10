@@ -143,6 +143,9 @@
     <ClCompile Include="emc.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Legendre.cpp" />
+    <ClCompile Include="LegendreFitter.cpp" />
+    <ClCompile Include="LinearAlgebra.cpp" />
+    <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="MyFile.cpp" />
     <ClCompile Include="ParallelPlateChamber.cpp" />
     <ClCompile Include="PseudoDES.cpp" />
@@ -158,6 +161,9 @@
     <ClInclude Include="emc.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Legendre.h" />
+    <ClInclude Include="LegendreFitter.h" />
+    <ClInclude Include="LinearAlgebra.h" />
+    <ClInclude Include="Matrix.h" />
     <ClInclude Include="MyFile.h" />
     <ClInclude Include="ParallelPlateChamber.h" />
     <ClInclude Include="PseudoDES.h" />
