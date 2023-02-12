@@ -18,6 +18,7 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 	int nTravelError = 0;
 	double sumTravelError2 = 0.0;
 	double sumPath = 0.0;
+	bool doTestPoints = nShow == -2;
 
 	for (int iRep = 0; iRep < reps; iRep++)
 	{
@@ -85,6 +86,7 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 		sumCols += cols;
 		sumCols2 += cols * cols;
 		lFit.Accumulate(zStart, ions);
+		if (doTestPoints) fprintf(stderr, "%10.5f %6d\n", zStart, nIonizations);
 	}
 	printf("\n");
 	double meanPath = sumPath / reps / lambda ;
@@ -95,5 +97,5 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 	double stdDevCols = sqrt(sumCols2 / reps - meanCols * meanCols);
 	errCols = stdDevCols / sqrt((double)reps);
 	rmsTravelError = sqrt(sumTravelError2 / nTravelError);
-	printf("meanPath = %.7f\n", meanPath);
+	//printf("meanPath = %.7f\n", meanPath);
 }
