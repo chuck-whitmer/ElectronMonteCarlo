@@ -15,6 +15,7 @@
 #include "Legendre.h"
 
 using std::chrono::steady_clock;
+using std::vector;
 
 int main(int argc, char* argv[])
 {
@@ -25,11 +26,6 @@ unordered_map<string, string> emc::args;
 
 int emc::main(int argc, char *argv[])
 {
-    Legendre p10(10);
-    for (int i = 0; i < 11; i++)
-        printf("%.6f\n", p10.eval(i / 10.0));
-
-
     double d1 = 5.0e-2;  // 5 cm
     double d2 = d1;
     StepType dStep = linear;
@@ -194,6 +190,41 @@ int emc::main(int argc, char *argv[])
         printf("Ni %.3f Nc %.3f d %.3f dt %.2e ions %.2f +- %.2f  cols %.2f +- %.2f  rte %.5f  V/Nc %.2f  %.2f sec\n",
             Ni, Nc, d, dt,
             run.meanIons, run.errIons, run.meanCols, run.errCols, run.rmsTravelError, V / Nc, time.count() * 1e-9);
+        try
+        {
+            Matrix b = run.lFit.SolveFit();
+            vector<int> orders = run.lFit.Orders();
+            printf("Legendre Fit:\n");
+            for (int i = 0; i < orders.size(); i++)
+            {
+                printf("%10d", orders[i]);
+            }
+            printf("\n");
+            for (int i = 0; i < orders.size(); i++)
+            {
+                printf("%10.4f", b(i));
+            }
+            printf("\n");
+            Matrix error;
+            run.lFit.ParameterError(error);
+            for (int i = 0; i < orders.size(); i++)
+            {
+                printf("%10.4f", error(i));
+            }
+            printf("\n");
+            printf("Test points:\n");
+            for (int i=-10; i<=10; i++)
+            {
+                double z = i / 10.0;
+                double val = run.lFit.FitValue(z);
+                double err = run.lFit.FitError(z);
+                printf("%5.2f: %10.4f +- %10.4f\n", z, val, err);
+            }
+        }
+        catch (std::exception& e)
+        {
+            printf("oops: %s\n", e.what());
+        }
     }
     if (mathematicaOutput)
     {

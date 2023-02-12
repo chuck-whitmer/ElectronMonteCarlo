@@ -9,6 +9,8 @@ LegendreFitter::LegendreFitter(std::initializer_list<int> theOrders) : orders(th
 	sumPP.ResizeAndClear(dim, dim);
 	sumPy.ResizeAndClear(dim);
 	workP.ResizeAndClear(dim);
+	choleskyP.ResizeAndClear(dim);
+	choleskyB.ResizeAndClear(dim);
 }
 
 void LegendreFitter::Accumulate(double z, double y)
@@ -35,28 +37,39 @@ void LegendreFitter::Accumulate(double z, double y)
 const Matrix& LegendreFitter::SolveFit()
 {
 	cholesky = sumPP;
-	LinearAlgebra::CholeskyDecomposition(cholesky.data(), choleskyP.data(), dim);
+	LinearAlgebra::CholeskyDecomposition(cholesky, choleskyP);
 	choleskyB = sumPy;
-	LinearAlgebra::CholeskySolver(cholesky.data(), choleskyP.data(), dim, choleskyB.data());
+	LinearAlgebra::CholeskySolver(cholesky, choleskyP, choleskyB);
 	return choleskyB;
 }
 
-double LegendreFitter::FitValue(double z)
+double LegendreFitter::FitValue(double z) const
 {
 	double sum = 0;
-	for (Legendre pn : p)
-	{
-		sum += pn(z);
-	}
+	for (int i = 0; i < dim; i++)
+		sum += choleskyB(i) * p[i](z);
 	return sum;
 }
 
-double LegendreFitter::FitError(double z)
+double LegendreFitter::FitError(double z) const
 {
 	Matrix pvec(dim);
 	for (int i = 0; i < dim; i++)
 		pvec(i) = p[i](z);
 	Matrix pvec2 = pvec;
-	LinearAlgebra::CholeskySolver(cholesky.data(), choleskyP.data(), dim, pvec2.data());
-	return Matrix::Dot(pvec, pvec2);
+	LinearAlgebra::CholeskySolver(cholesky, choleskyP, pvec2);
+	return sqrt(Matrix::Dot(pvec, pvec2));
+}
+
+void LegendreFitter::ParameterError(Matrix& error) const
+{
+	error.ResizeAndClear(dim);
+	Matrix unit(dim);
+	for (int i = 0; i < dim; i++)
+	{
+		unit.Clear();
+		unit(i) = 1.0;
+		LinearAlgebra::CholeskySolver(cholesky, choleskyP, unit);
+		error(i) = sqrt(unit(i));
+	}
 }

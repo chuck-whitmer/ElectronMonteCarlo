@@ -21,11 +21,12 @@ public:
 	LegendreFitter(std::initializer_list<int> theOrders);
 	void Accumulate(double z, double y);
 	const Matrix& SolveFit();
-	const std::vector<int>& Orders()
+	void ParameterError(Matrix& error) const;
+	const std::vector<int>& Orders() const
 	{
 		return orders;
 	}
-	double FitValue(double z);
-	double FitError(double z);
+	double FitValue(double z) const;
+	double FitError(double z) const;
 };
 

@@ -21,13 +21,13 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 
 	for (int iRep = 0; iRep < reps; iRep++)
 	{
-		//printf("%d\r", iRep+1);
 		int nIonizations = 0;
 		int nCollisions = 0;
 
 		// Push the first electron.
-		stack.emplace(pp.CathodeStart(rand), Vec3::Zero);
-		//if (nShow == -1 || nShow == iRep+1) stack.top().showPath = true;
+		Vec3 startPoint = pp.CathodeStart(rand);
+		double zStart = startPoint.z / startPoint.Norm(); // From -1 to 1. Same as cos theta.
+		stack.emplace(startPoint, Vec3::Zero);
 		bool doShow = nShow == -1 || nShow == iRep + 1;
 		double eCount = 0.0;
 
@@ -84,6 +84,7 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 		double cols = nCollisions;
 		sumCols += cols;
 		sumCols2 += cols * cols;
+		lFit.Accumulate(zStart, ions);
 	}
 	printf("\n");
 	double meanPath = sumPath / reps / lambda ;

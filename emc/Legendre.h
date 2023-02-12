@@ -12,6 +12,6 @@ public:
 
 	const std::vector<double>& P() const { return innerP; }
 	double operator()(double x) const;
-	double eval(double x) const;
+	//double eval(double x) const;
 };
 

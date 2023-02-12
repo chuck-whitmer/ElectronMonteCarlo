@@ -15,3 +15,25 @@ double Matrix::Dot(const Matrix& m1, const Matrix& m2)
 	return sum;
 }
 
+Matrix::Matrix(const std::initializer_list<const std::initializer_list<double>> list)
+{
+	rows = list.size();
+	int minCols = INT_MAX;
+	int maxCols = 0;
+	for (auto l : list)
+	{
+		int s = l.size();
+		if (s > maxCols) maxCols = s;
+		if (s < minCols) minCols = s;
+	}
+	if (minCols != maxCols || minCols < 1)
+		throw std::exception("Invalid matrix initializer");
+	cols = minCols;
+	pe = new double[(long)rows * cols];
+	double* p = pe;
+	for (auto l : list)
+	{
+		std::copy(l.begin(),l.end(),p);
+		p += cols;
+	}
+}
