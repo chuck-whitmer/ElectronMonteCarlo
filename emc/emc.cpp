@@ -141,6 +141,7 @@ int emc::main(int argc, char *argv[])
             fprintf(stderr, "File error: %s\n", e.what());
             return 1;
         }
+        //TestEfield(geom);
     }
 
     for (int i = 0; i < steps; i++)
@@ -190,40 +191,43 @@ int emc::main(int argc, char *argv[])
         printf("Ni %.3f Nc %.3f d %.3f dt %.2e ions %.2f +- %.2f  cols %.2f +- %.2f  rte %.5f  V/Nc %.2f  %.2f sec\n",
             Ni, Nc, d, dt,
             run.meanIons, run.errIons, run.meanCols, run.errCols, run.rmsTravelError, V / Nc, time.count() * 1e-9);
-        try
+        if (shape == "scf")
         {
-            Matrix b = run.lFit.SolveFit();
-            vector<int> orders = run.lFit.Orders();
-            printf("Legendre Fit:\n");
-            for (int i = 0; i < orders.size(); i++)
+            try
             {
-                printf("%10d", orders[i]);
+                Matrix b = run.lFit.SolveFit();
+                vector<int> orders = run.lFit.Orders();
+                printf("Legendre Fit:\n");
+                for (int i = 0; i < orders.size(); i++)
+                {
+                    printf("%10d", orders[i]);
+                }
+                printf("\n");
+                for (int i = 0; i < orders.size(); i++)
+                {
+                    printf("%10.4f", b(i));
+                }
+                printf("\n");
+                Matrix error;
+                run.lFit.ParameterError(error);
+                for (int i = 0; i < orders.size(); i++)
+                {
+                    printf("%10.4f", error(i));
+                }
+                printf("\n");
+                printf("Test points:\n");
+                for (int i = -10; i <= 10; i++)
+                {
+                    double z = i / 10.0;
+                    double val = run.lFit.FitValue(z);
+                    double err = run.lFit.FitError(z);
+                    printf("%5.2f: %10.4f +- %10.4f\n", z, val, err);
+                }
             }
-            printf("\n");
-            for (int i = 0; i < orders.size(); i++)
+            catch (std::exception& e)
             {
-                printf("%10.4f", b(i));
+                printf("oops: %s\n", e.what());
             }
-            printf("\n");
-            Matrix error;
-            run.lFit.ParameterError(error);
-            for (int i = 0; i < orders.size(); i++)
-            {
-                printf("%10.4f", error(i));
-            }
-            printf("\n");
-            printf("Test points:\n");
-            for (int i=-10; i<=10; i++)
-            {
-                double z = i / 10.0;
-                double val = run.lFit.FitValue(z);
-                double err = run.lFit.FitError(z);
-                printf("%5.2f: %10.4f +- %10.4f\n", z, val, err);
-            }
-        }
-        catch (std::exception& e)
-        {
-            printf("oops: %s\n", e.what());
         }
     }
     if (mathematicaOutput)
@@ -237,6 +241,32 @@ int emc::main(int argc, char *argv[])
     delete geom;
     return 1;
 }
+
+void emc::TestEfield(Geometry *geom)
+{
+    using std::pair;
+
+    vector<pair<double,double>> ptList=
+    { {4.60884, 6.56359}, { 3.70718,2.17675 }, { 3.79204,4.78778 }, 
+        { 3.85578,6.22376 }, { 0.581694,6.43163 }, { 1.86628,1.5857 }, 
+        { 2.90555,0.304272 }, { 4.57528,4.36854 }, { 0.152289,6.79656 }, 
+        { 3.08353,1.12602 }, { 0.835754,4.23547 }, { 1.83895,4.89296 }, 
+        { 0.692179,1.9846 }, { 1.62829,6.1271 }, { 6.26024,4.0499 }, 
+        { 4.3141,6.68255 }, { 3.13939,3.28667 }, { 2.55357,6.45817 }, 
+        { 6.46004,2.84543 }, { 5.91566,5.07859 }};
+
+    for (pair<double,double> p : ptList)
+    {
+        Vec3 point(p.first, 0.0, p.second);
+        Vec3 efield = geom->EField(point * 0.01) * 0.01;
+        Vec3 point2(p.first, 0.0, -p.second);
+        Vec3 efield2 = geom->EField(point2 * 0.01) * 0.01;
+        printf("%8.5f %8.5f : %10.7f %10.7f %10.7f : %10.7f %10.7f %10.7f\n", point.x, point.z, efield.x, 
+            efield.y, efield.z, efield2.x, efield2.y, efield2.z);
+    }
+
+}
+
 
 double emc::Interpolate(double e1, double e2, int i, int steps, StepType t)
 {

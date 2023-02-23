@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <string>
+#include "Geometry.h"
 
 
 
@@ -34,4 +35,6 @@ private:
 	static bool MaybeGetArg(string key, int& e);
 	static bool MaybeGetBoolArg(string key, bool& e);
 	static void PrintUsage();
+
+	static void TestEfield(Geometry * geom);
 };

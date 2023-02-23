@@ -117,14 +117,14 @@ Vec3 Cylinder::EFieldXZ(double x, double z) const
 {
 	double xScaled = x / latticeSpacing;
 	double zScaled = z / latticeSpacing;
-	int i = (int)floor(xScaled);
-	double alpha = xScaled - floor(xScaled);
-	int j = (int)floor(zScaled);
-	double beta = zScaled - floor(zScaled);
+	int i = (int)floor(zScaled);
+	double alpha = zScaled - floor(zScaled);
+	int j = (int)floor(xScaled);
+	double beta = xScaled - floor(xScaled);
 
-	double Ex = -V / latticeSpacing * ((1.0 - beta) * (phiVertex(i + 1, j) - phiVertex(i, j))
+	double Ez = -V / latticeSpacing * ((1.0 - beta) * (phiVertex(i + 1, j) - phiVertex(i, j))
 		+ beta * (phiVertex(i + 1, j + 1) - phiVertex(i, j + 1)));
-	double Ez = -V / latticeSpacing * ((1.0 - alpha) * (phiVertex(i, j + 1) - phiVertex(i, j))
+	double Ex = -V / latticeSpacing * ((1.0 - alpha) * (phiVertex(i, j + 1) - phiVertex(i, j))
 		+ alpha * (phiVertex(i + 1, j + 1) - phiVertex(i + 1, j)));
 	return Vec3(Ex, 0.0, Ez);
 }
