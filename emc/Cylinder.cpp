@@ -76,10 +76,10 @@ double Cylinder::PhiRhoZ(double rho, double z) const
 {
 	double rhoScaled = rho / latticeSpacing;
 	double zScaled = z / latticeSpacing;
-	int i = (int)floor(rhoScaled);
-	double alpha = rhoScaled - floor(rhoScaled);
-	int j = (int)floor(zScaled);
-	double beta = zScaled - floor(zScaled);
+	int i = (int)floor(zScaled);
+	double alpha = zScaled - floor(zScaled);
+	int j = (int)floor(rhoScaled);
+	double beta = rhoScaled - floor(rhoScaled);
 	return V * ((1.0 - beta) * (1.0 - alpha) * phiVertex(i, j)
 		+ (1.0 - beta) * alpha * phiVertex(i + 1, j)
 		+ beta * (1.0 - alpha) * phiVertex(i, j + 1)

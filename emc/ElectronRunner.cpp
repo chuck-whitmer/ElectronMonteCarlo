@@ -19,6 +19,12 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 	double sumTravelError2 = 0.0;
 	double sumPath = 0.0;
 	bool doTestPoints = nShow == -2;
+	int nTravelErrorA = 0;
+	int nTravelErrorB = 0;
+	double sumTravelErrorA2 = 0.0;
+	double sumTravelErrorB2 = 0.0;
+
+
 
 	for (int iRep = 0; iRep < reps; iRep++)
 	{
@@ -44,6 +50,7 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 			{
 				// Get the distance to the next collision.
 				double s = -lambda * log(1.0 - rand.RandomDouble());
+
 
 				// Move the electron a distance s.
 				if (doShow) elec.PrintLocation(eCount);
@@ -89,7 +96,7 @@ ElectronRunner::ElectronRunner(double lambda, double Ui, Geometry& pp, PseudoDES
 		if (doTestPoints) fprintf(stderr, "%10.5f %6d\n", zStart, nIonizations);
 	}
 	printf("\n");
-	double meanPath = sumPath / reps / lambda ;
+	//double meanPath = sumPath / reps / lambda ;
 	meanIons = sumIons / reps;
 	double stdDevIons = sqrt(sumIons2 / reps - meanIons * meanIons);
 	errIons = stdDevIons / sqrt((double)reps);
