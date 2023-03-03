@@ -14,8 +14,10 @@ class LegendreFitter
 	Matrix workP;
 	Matrix cholesky;
 	Matrix choleskyP;
-	Matrix choleskyB;
+	Matrix choleskyB; // After we call SolveFit, this contains the solution.
+	double sumYY = 0.0;
 	double count = 0.0;
+	double variance; // After we call SolveFit, this contains the variance estimate.
 	int dim;
 public:
 	LegendreFitter(std::initializer_list<int> theOrders);
@@ -28,5 +30,7 @@ public:
 	}
 	double FitValue(double z) const;
 	double FitError(double z) const;
+	struct MaxVal { double z; double ions; double error; };
+	MaxVal FindMaximum() const;
 };
 

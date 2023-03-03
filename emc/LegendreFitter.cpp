@@ -31,6 +31,8 @@ void LegendreFitter::Accumulate(double z, double y)
 			if (i != j)	sumPP(j, i) = sumPP(i, j);
 		}
 	}
+	// Do the YY sum.
+	sumYY += y * y;
 	count += 1.0;
 }
 
@@ -40,6 +42,7 @@ const Matrix& LegendreFitter::SolveFit()
 	LinearAlgebra::CholeskyDecomposition(cholesky, choleskyP);
 	choleskyB = sumPy;
 	LinearAlgebra::CholeskySolver(cholesky, choleskyP, choleskyB);
+	variance = (sumYY - Matrix::Dot(choleskyB, sumPy)) / (count - orders.size()); // chisquare/DOF
 	return choleskyB;
 }
 
@@ -58,7 +61,7 @@ double LegendreFitter::FitError(double z) const
 		pvec(i) = p[i](z);
 	Matrix pvec2 = pvec;
 	LinearAlgebra::CholeskySolver(cholesky, choleskyP, pvec2);
-	return sqrt(Matrix::Dot(pvec, pvec2));
+	return sqrt(variance*Matrix::Dot(pvec, pvec2));
 }
 
 void LegendreFitter::ParameterError(Matrix& error) const
@@ -70,6 +73,27 @@ void LegendreFitter::ParameterError(Matrix& error) const
 		unit.Clear();
 		unit(i) = 1.0;
 		LinearAlgebra::CholeskySolver(cholesky, choleskyP, unit);
-		error(i) = sqrt(unit(i));
+		error(i) = sqrt(variance * unit(i));
 	}
+}
+
+LegendreFitter::MaxVal LegendreFitter::FindMaximum() const
+{
+	double bestZ = 0.0;
+	double bestIons = FitValue(0.0);
+	double bestError = FitError(0.0);
+
+	for (int i = 1; i <= 100; i++)
+	{
+		double z = i / 100.0;
+		double val = FitValue(z);
+		if (val > bestIons)
+		{
+			bestZ = z;
+			bestIons = val;
+			bestError = FitError(z);
+		}
+	}
+	struct MaxVal mv = { bestZ, bestIons, bestError };
+	return mv;
 }

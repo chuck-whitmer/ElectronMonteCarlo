@@ -46,6 +46,7 @@ int emc::main(int argc, char *argv[])
     int steps = 1;
     bool showPath = false;
     int nShowPath = 0;
+    bool showFit = false;
 
     double dt1 = 1.0;
     double dt2 = dt1;
@@ -83,6 +84,7 @@ int emc::main(int argc, char *argv[])
     if (!MaybeGetArg("steps", steps)) return 1;
     if (!MaybeGetBoolArg("showpath", showPath)) return 1;
     if (showPath) if (!MaybeGetArg("pathnum", nShowPath)) return 1;
+    if (!MaybeGetBoolArg("showfit", showFit)) return 1;
     if (!MaybeGetBoolArg("mathematica", mathematicaOutput)) return 1;
 
     MaybeGetArg("shape", shape);
@@ -104,6 +106,7 @@ int emc::main(int argc, char *argv[])
 
     char buf[128];
     std::vector<string> mathematicaListing;
+    std::vector<string> mathematicaFitListing;
 
     fprintf(stderr, "Command line: emc");
     for (int i = 1; i < argc; i++)
@@ -193,9 +196,17 @@ int emc::main(int argc, char *argv[])
             run.meanIons, run.errIons, run.meanCols, run.errCols, run.rmsTravelError, V / Nc, time.count() * 1e-9);
         if (shape == "scf")
         {
-            try
+            Matrix b = run.lFit.SolveFit();
+            LegendreFitter::MaxVal max = run.lFit.FindMaximum();
+            printf("Max Ni % .3f Nc % .3f z %.2f ions %.2f error %.2f\n", Ni, Nc, max.z, max.ions, max.error);
+            if (mathematicaOutput)
             {
-                Matrix b = run.lFit.SolveFit();
+                sprintf_s(buf, sizeof buf, "  {%.3f,%.3f,{%.2f,%.2f,%.2f}}%s\n", Ni, Nc, max.z, max.ions, max.error, (i < steps - 1) ? "," : "");
+                mathematicaFitListing.emplace_back(buf);
+            }
+
+            if (showFit)
+            {
                 vector<int> orders = run.lFit.Orders();
                 printf("Legendre Fit:\n");
                 for (int i = 0; i < orders.size(); i++)
@@ -224,10 +235,6 @@ int emc::main(int argc, char *argv[])
                     printf("%5.2f: %10.4f +- %10.4f\n", z, val, err);
                 }
             }
-            catch (std::exception& e)
-            {
-                printf("oops: %s\n", e.what());
-            }
         }
     }
     if (mathematicaOutput)
@@ -237,6 +244,15 @@ int emc::main(int argc, char *argv[])
         for (string s : mathematicaListing)
             printf(s.c_str());
         printf("}\n");
+
+        if (shape == "scf")
+        {
+            printf("\n");
+            printf("{\n");
+            for (string s : mathematicaFitListing)
+                printf(s.c_str());
+            printf("}\n");
+        }
     }
     delete geom;
     return 1;
